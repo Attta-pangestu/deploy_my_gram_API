@@ -4,17 +4,19 @@ import (
 	"MyGramAtta/models"
 	"fmt"
 	"log"
+	"os"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
+
 var (
-	host     = "localhost"
-	user     = "root"
-	password = ""
-	port     = "3306"
-	dbname   = "my-gram-db"
+	host     = os.Getenv("DB_HOST")
+	user     = os.Getenv("DB_USER")
+	password = os.Getenv("DB_PASSWORD")
+	port     = os.Getenv("DB_PORT")
+	dbname   = os.Getenv("DB_NAME")
 	db       *gorm.DB
 	err      error
 )
