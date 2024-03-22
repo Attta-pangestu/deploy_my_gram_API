@@ -12,11 +12,11 @@ import (
 
 
 var (
-	host     = os.Getenv("DB_HOST")
-	user     = os.Getenv("DB_USER")
-	password = os.Getenv("DB_PASSWORD")
-	port     = os.Getenv("DB_PORT")
-	dbname   = os.Getenv("DB_NAME")
+	host     = os.Getenv("MYSQLHOST")
+	user     = os.Getenv("MYSQLUSER")
+	password = os.Getenv("MYSQLPASSWORD")
+	port     = os.Getenv("MYSQLPORT")
+	dbname   = os.Getenv("MYSQLDATABASE")
 	db       *gorm.DB
 	err      error
 )
