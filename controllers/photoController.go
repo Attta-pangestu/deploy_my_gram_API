@@ -164,12 +164,10 @@ func GetAllPhotos(ctx *gin.Context) {
 		return
 	}
 
-	// Membuat slice baru untuk menyimpan data foto yang sudah dimodifikasi
 	var responsePhotos []models.PhotoResponse
 	for _, photo := range photos {
-		// Menambahkan data foto ke dalam slice baru
 		responsePhotos = append(responsePhotos, models.PhotoResponse{
-			ID:         photo.ID,
+			 ID:         photo.ID,
 			Title:      photo.Title,
 			Caption:   photo.Caption,
 			PhotoUrl:   photo.PhotoUrl,

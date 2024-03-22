@@ -12,55 +12,54 @@ func StartServer() *gin.Engine {
 
 	userRouter := r.Group("/users")
 	{
+		
 		userRouter.POST("/register", controllers.RegisterUser)
-
+		
 		userRouter.POST("/login", controllers.LoginUser)
+		
+		userRouter.Use(middlewares.UserAuthentication())
+		userRouter.PUT("/", middlewares.UserAuthentication(), controllers.UpdateUser)
+		userRouter.DELETE("/", middlewares.UserAuthentication(), controllers.DeleteUser)
 	}
 
-	r.Static("/img", "./assets")
-	photoRouter := r.Group("/photo")
+	photoRouter := r.Group("/photos")
 	{
-		photoRouter.Use(middlewares.Authetication())
+		photoRouter.Use(middlewares.UserAuthentication())
 
-		photoRouter.POST("/post", controllers.CreatePhoto)
+		photoRouter.POST("/", controllers.CreatePhoto)
 
-		photoRouter.GET("/getAll", controllers.GetAllPhoto)
+		photoRouter.GET("/", controllers.GetAllPhotos)
 
-		photoRouter.GET("/getOne/:photoID", controllers.GetOnePhoto)
+		photoRouter.PUT("/:photoID", middlewares.PhotoAuthorization(), controllers.UpdatePhoto)
 
-		photoRouter.PUT("/update/:photoID", middlewares.PhotoAuthorization(), controllers.UpdatePhoto)
-
-		photoRouter.DELETE("/delete/:photoID", middlewares.PhotoAuthorization(), controllers.DeletePhoto)
+		photoRouter.DELETE("/:photoID", middlewares.PhotoAuthorization(), controllers.DeletePhoto)
 	}
 
-	commentRouter := r.Group("/comment")
+	commentRouter := r.Group("/comments")
 	{
-		commentRouter.Use(middlewares.Authetication())
+		commentRouter.Use(middlewares.UserAuthentication())
 
-		commentRouter.POST("/create", controllers.CreateComment)
+		commentRouter.POST("/", controllers.CreateComment)
 
-		commentRouter.GET("/getAll", controllers.GetAllComent)
+		commentRouter.GET("/", controllers.GetAllComments)
 
-		commentRouter.GET("/getOne/:commentID", controllers.GetOneComment)
 
-		commentRouter.PUT("/update/:commentID", middlewares.CommentAuthorization(), controllers.UpdateComment)
+		commentRouter.PUT("/:commentID", middlewares.CommentAuthorization(), controllers.UpdateComment)
 
-		commentRouter.DELETE("/delete/:commentID", middlewares.CommentAuthorization(), controllers.DeleteComent)
+		commentRouter.DELETE("/:commentID", middlewares.CommentAuthorization(), controllers.DeleteComent)
 	}
 
-	socialMediaRouter := r.Group("/social-media")
+	socialMediaRouter := r.Group("/socialmedias")
 	{
-		socialMediaRouter.Use(middlewares.Authetication())
+		socialMediaRouter.Use(middlewares.UserAuthentication())
 
-		socialMediaRouter.POST("/create", controllers.CreateSocialMedia)
+		socialMediaRouter.POST("/", controllers.CreateSocialMedia)
 
-		socialMediaRouter.GET("/getAll", controllers.GetAllSocialMedia)
+		socialMediaRouter.GET("/", controllers.GetAllSocialMedia)
 
-		socialMediaRouter.GET("/getOne/:socialMediaID", controllers.GetOneSocialMedia)
+		socialMediaRouter.PUT("/:socialMediaID", middlewares.SocialMediaAuthorization(), controllers.UpdateSocialMedia)
 
-		socialMediaRouter.PUT("/update/:socialMediaID", middlewares.SocialMediaAuthorization(), controllers.UpdateSocialMedia)
-
-		socialMediaRouter.DELETE("/delete/:socialMediaID", middlewares.SocialMediaAuthorization(), controllers.DeleteSocialMedia)
+		socialMediaRouter.DELETE("/:socialMediaID", middlewares.SocialMediaAuthorization(), controllers.DeleteSocialMedia)
 	}
 
 	return r

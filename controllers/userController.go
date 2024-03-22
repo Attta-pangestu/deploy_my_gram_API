@@ -6,6 +6,7 @@ import (
 	repo "MyGramAtta/repo"
 	"net/http"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
 
@@ -65,6 +66,8 @@ func RegisterUser(ctx *gin.Context) {
 // @Failure 400 {object} models.ResponseFailed
 // @Failure 401 {object} models.ResponseFailed
 // @Router /user/login [post]
+
+
 func LoginUser(ctx *gin.Context) {
 	var user models.User
 
@@ -100,7 +103,7 @@ func LoginUser(ctx *gin.Context) {
 		return
 	}
 
-	token, err := helpers.GenerateToken(user.ID, user.Username)
+	token, err := helpers.GenerateToken(user.ID, user.Username, user.Email)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
@@ -109,6 +112,129 @@ func LoginUser(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"token": token,
+		"token": token, 
 	})
 }
+
+
+// UpdateUser godoc
+// @Summary Update User
+// @Description Update user by id
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param id path int true "User ID"
+// @Param UserUpdate body models.RequestUserUpdate true "User Update"
+// @Success 200 {object} models.User
+// @Failure 400 {object} models.ResponseFailed
+// @Failure 401 {object} models.ResponseFailed
+// @Router /user/{id} [put]
+
+
+type RequestUserUpdate struct {
+	Email    string `json:"email"`
+	Username string `json:"username"`
+}
+
+func UpdateUser(ctx *gin.Context) {
+	var updateUser models.RequestUserUpdate
+	
+
+	db := repo.GetDB()
+
+	userData := ctx.MustGet("userData").(jwt.MapClaims)
+	userID := uint(userData["id"].(float64))
+
+	if err := ctx.ShouldBindJSON(&updateUser); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Bad Request",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if updateUser.Email == "" || updateUser.Username == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Bad Request",
+			"message": "Email dan username harus disediakan",
+		})
+		return
+	}
+
+	// Perbarui data pengguna
+	var user models.User
+	err := db.Debug().Where("id = ?", userID).First(&user).Updates(map[string]interface{}{
+		"email":    updateUser.Email,
+		"username": updateUser.Username,
+	}).Error
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Internal Server Error",
+			"message": "Gagal memperbarui data pengguna",
+		})
+		return
+	}
+
+	output := gin.H{
+		"id":        user.ID,
+		"email":     user.Email,
+		"username":  user.Username,
+		"age":       user.Age,
+		"updated_at": user.UpdatedAt,
+
+	}
+
+	ctx.JSON(http.StatusOK, output)
+}
+
+
+// DeleteUser godoc
+// @Summary Delete User
+// @Description Delete user by id
+// @Tags User
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "User ID"
+// @Success 200 {string} string "User successfully deleted"
+// @Failure 400 {object} models.ResponseFailed
+// @Failure 401 {object} models.ResponseFailed
+// @Failure 404 {object} models.ResponseFailed
+// @Router /user/{id} [delete]
+func DeleteUser(ctx *gin.Context) {
+	db := repo.GetDB()
+
+	userData := ctx.MustGet("userData").(jwt.MapClaims)
+	userID := uint(userData["id"].(float64))
+
+	var user models.User
+
+	// Cek apakah pengguna ditemukan
+	err := db.Debug().Where("id = ?", userID).First(&user).Error
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{
+			"error":   "Not Found",
+			"message": "Pengguna tidak ditemukan",
+		})
+		return
+	}
+
+	// Hapus pengguna
+	err = db.Debug().Delete(&user).Error
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Internal Server Error",
+			"message": "Gagal menghapus pengguna",
+		})
+		return
+	}
+
+	ctx.
+	JSON(http.StatusOK, gin.H{
+		"message": "Your account has been successfully deleted",
+	})
+}
+
+
+
