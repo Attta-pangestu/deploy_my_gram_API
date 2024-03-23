@@ -97,6 +97,7 @@ func CreatePhoto(ctx *gin.Context) {
 			"photo_url":  photo.PhotoUrl,
 			"user_id":    photo.UserID,
 			"created_at": photo.CreatedAt,
+			
 	}
 	ctx.JSON(http.StatusCreated, response)
 }
