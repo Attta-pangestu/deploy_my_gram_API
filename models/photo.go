@@ -17,7 +17,7 @@ type Photo struct {
 
 
 func (p *Photo) TableName() string {
-	return "tb_photo_1"
+	return "tb_photo_2"
 }
 
 func (p *Photo) BeforeCreate(tx *gorm.DB) (err error) {
