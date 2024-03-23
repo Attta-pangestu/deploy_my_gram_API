@@ -15,9 +15,6 @@ import (
 // @in header -> Bearer
 // @name Authorization
 func main() {
-    repo.StartDB()
-
-    repo.EnsureTablesCreated()
-
-    routers.StartServer().Run(":8080")
+	repo.StartDB()
+	routers.StartServer().Run(":8080")
 }
